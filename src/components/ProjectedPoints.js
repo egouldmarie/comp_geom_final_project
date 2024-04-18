@@ -20,61 +20,20 @@ class ProjectedPointClass extends React.Component {
         this.add()
         if (this.point) {
             if (
-                this.props.color &&
-                (this.props.color.r !== prevProps.color.r ||
-                    this.props.color.g !== prevProps.color.g ||
-                    this.props.color.b !== prevProps.color.b)
+                this.props.color.r !== prevProps.color.r ||
+                this.props.color.g !== prevProps.color.g ||
+                this.props.color.b !== prevProps.color.b
             ) {
-                for (let i = 0; i < this.point.children.length; i++) {
-                    this.point.children[i].material.color = new THREE.Color(
-                        "rgb(" +
-                            this.props.color.r +
-                            ", " +
-                            this.props.color.g +
-                            ", " +
-                            this.props.color.b +
-                            ")"
-                    )
-                    this.point.children[i].material.needsUpdate = true
-                }
-            }
-
-            if (
-                this.props.euler?.x !== prevProps.euler?.x ||
-                this.props.euler?.y !== prevProps.euler?.y ||
-                this.props.euler?.z !== prevProps.euler?.z ||
-                this.props.normalx !== this.state.normalx ||
-                this.props.normaly !== this.state.normaly ||
-                this.props.normalz !== this.state.normalz
-            ) {
-                let pos = new THREE.Vector3()
-                this.props.plane?.intersectLine(
-                    new THREE.Line3(
-                        new THREE.Vector3(),
-                        new THREE.Vector3(1, 0, 0)
-                            .applyEuler(
-                                new THREE.Euler(
-                                    this.props.euler?.x,
-                                    this.props.euler?.y,
-                                    this.props.euler?.z
-                                )
-                            )
-                            .multiplyScalar(100)
-                    ),
-                    pos
+                this.point.material.color = new THREE.Color(
+                    "rgb(" +
+                        this.props.color.r +
+                        ", " +
+                        this.props.color.g +
+                        ", " +
+                        this.props.color.b +
+                        ")"
                 )
-
-                if (pos.x === 0 && pos.y === 0 && pos.z === 0) {
-                    this.point.visible = false
-                } else {
-                    this.point.visible = true
-                    this.point.position.set(pos.x, pos.y, pos.z)
-                }
-                this.setState({
-                    normalx: this.props.normalx,
-                    normaly: this.props.normaly,
-                    normalz: this.props.normalz,
-                })
+                this.point.material.needsUpdate = true
             }
         }
     }
@@ -84,9 +43,9 @@ class ProjectedPointClass extends React.Component {
     }
 
     add() {
-        if (!this.point && this.props.color && this.props.euler) {
+        if (!this.point && this.props.color) {
             this.point = new THREE.Mesh(
-                new THREE.SphereGeometry(0.025, 16, 16),
+                new THREE.SphereGeometry(0.04, 16, 16),
                 new THREE.MeshBasicMaterial({
                     color: new THREE.Color(
                         "rgb(" +
@@ -100,24 +59,38 @@ class ProjectedPointClass extends React.Component {
                 })
             )
 
-            let pos = new THREE.Vector3()
-            this.props.plane?.intersectLine(
-                new THREE.Line3(
-                    new THREE.Vector3(),
-                    new THREE.Vector3(1, 0, 0)
-                        .applyEuler(
-                            new THREE.Euler(
-                                this.props.euler?.x,
-                                this.props.euler?.y,
-                                this.props.euler?.z
-                            )
-                        )
-                        .multiplyScalar(100)
-                ),
-                pos
-            )
+            this.point.frustumCulled = false
+            window.point = this.point
 
-            this.point.position.set(pos.x, pos.y, pos.z)
+            this.point.onBeforeRender = () => {
+                let pos = new THREE.Vector3()
+                this.props.plane?.intersectLine(
+                    new THREE.Line3(
+                        new THREE.Vector3(),
+                        new THREE.Vector3(1, 0, 0)
+                            .applyMatrix4(
+                                new THREE.Matrix4().multiplyMatrices(
+                                    new THREE.Matrix4().makeRotationZ(
+                                        this.props.theta
+                                    ),
+                                    new THREE.Matrix4().makeRotationY(
+                                        this.props.phi
+                                    )
+                                )
+                            )
+                            .multiplyScalar(100)
+                    ),
+                    pos
+                )
+
+                this.point.position.set(pos.x, pos.y, pos.z)
+
+                if (pos.x === 0 && pos.y === 0 && pos.z === 0) {
+                    this.point.position.set(1000000, 1000000, 1000000)
+                } else {
+                    this.point.position.set(pos.x, pos.y, pos.z)
+                }
+            }
         }
 
         if (
@@ -145,9 +118,9 @@ class ProjectedPointClass extends React.Component {
 
 function mapStateToProps(state, ownProps) {
     return {
-        plane: state.plane,
+        phi: state.points?.[ownProps.id]?.phi,
+        theta: state.points?.[ownProps.id]?.theta,
         color: state.points?.[ownProps.id]?.color,
-        euler: state.points?.[ownProps.id]?.euler,
     }
 }
 

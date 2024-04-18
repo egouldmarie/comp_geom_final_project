@@ -51,7 +51,8 @@ class OrthoProjViewClass extends React.Component {
                 new THREE.Vector3(Math.sqrt(2), Math.sqrt(2), 0),
                 1
             ),
-            3
+            20,
+            0x555555
         )
 
         this.pointGroup = new THREE.Group()
@@ -86,6 +87,7 @@ class OrthoProjViewClass extends React.Component {
         }
         if (!this.props.scene?.children.includes(this.pointGroup)) {
             this.props.scene.add(this.pointGroup)
+            this.setState({ groupReady: true })
         }
     }
 
@@ -132,9 +134,11 @@ class OrthoProjViewClass extends React.Component {
             this.controls.update()
 
             this.plane.visible = false
+            this.pointGroup.visible = false
             this.orthoRenderer.render(this.props.scene, this.orthoCamera)
 
             this.plane.visible = true
+            this.pointGroup.visible = true
             this.plane.plane.normal = new THREE.Vector3()
                 .copy(this.orthoCamera.position)
                 .normalize()
@@ -142,6 +146,7 @@ class OrthoProjViewClass extends React.Component {
             this.projRenderer.render(this.props.scene, this.orthoCamera)
             if (!this.props.showPlane) {
                 this.plane.visible = false
+                this.pointGroup.visible = false
             }
         }
     }
@@ -205,13 +210,14 @@ class OrthoProjViewClass extends React.Component {
                 {this.props.points
                     ? Object.keys(this.props.points).map((key) => (
                           <ProjectedPoint
-                              normalx={this.plane.plane.normal.x}
-                              normaly={this.plane.plane.normal.y}
-                              normalz={this.plane.plane.normal.z}
                               id={key}
                               key={key}
                               plane={this.plane.plane}
-                              group={this.props.pointGroup}
+                              group={
+                                  this.state.groupReady
+                                      ? this.pointGroup
+                                      : undefined
+                              }
                           />
                       ))
                     : undefined}

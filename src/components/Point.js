@@ -38,16 +38,16 @@ class PointClass extends React.Component {
                     this.point.children[i].material.needsUpdate = true
                 }
             }
+
             if (
-                this.props.euler &&
-                (this.props.euler.x !== prevProps.euler.x ||
-                    this.props.euler.y !== prevProps.euler.y ||
-                    this.props.euler.z !== prevProps.euler.z)
+                this.props.phi !== prevProps.phi ||
+                this.props.theta !== prevProps.theta
             ) {
-                this.point.rotation.set(
-                    this.props.euler.x,
-                    this.props.euler.y,
-                    this.props.euler.z
+                this.point.rotation.setFromRotationMatrix(
+                    new THREE.Matrix4().multiplyMatrices(
+                        new THREE.Matrix4().makeRotationZ(this.props.theta),
+                        new THREE.Matrix4().makeRotationY(this.props.phi)
+                    )
                 )
             }
         }
@@ -58,7 +58,7 @@ class PointClass extends React.Component {
     }
 
     add() {
-        if (!this.point && this.props.color && this.props.euler) {
+        if (!this.point && this.props.color) {
             let point = new THREE.Mesh(
                 new THREE.SphereGeometry(0.025, 16, 16),
                 new THREE.MeshBasicMaterial({
@@ -99,10 +99,11 @@ class PointClass extends React.Component {
             this.point.add(point)
             this.point.add(line)
 
-            this.point.rotation.set(
-                this.props.euler?.x,
-                this.props.euler?.y,
-                this.props.euler?.z
+            this.point.rotation.setFromRotationMatrix(
+                new THREE.Matrix4().multiplyMatrices(
+                    new THREE.Matrix4().makeRotationZ(this.props.theta),
+                    new THREE.Matrix4().makeRotationY(this.props.phi)
+                )
             )
         }
 
@@ -131,8 +132,9 @@ class PointClass extends React.Component {
 
 function mapStateToProps(state, ownProps) {
     return {
+        phi: state.points?.[ownProps.id]?.phi,
+        theta: state.points?.[ownProps.id]?.theta,
         color: state.points?.[ownProps.id]?.color,
-        euler: state.points?.[ownProps.id]?.euler,
     }
 }
 

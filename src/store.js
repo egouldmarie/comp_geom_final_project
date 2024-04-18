@@ -13,13 +13,14 @@ const reducer = (
     state = {
         points: {
             default: {
+                phi: -0.7854,
+                theta: 0.7854,
                 color: { r: 255, g: 0, b: 0 },
-                euler: { x: -0.25, y: -1, z: 0.4 },
             },
         },
         scalar: 1,
         showAxes: true,
-        showPlane: true,
+        showPlane: false,
         selectedID: "default",
         distortCoefficients: { r0: 0, r1: 0, r2: 0, r3: 0 },
     },

@@ -94,14 +94,10 @@ class GreatCircleClass extends React.Component {
                 this.circle.material.needsUpdate = true
             }
             if (
-                (this.props.euler1 &&
-                    (this.props.euler1.x !== prevProps.euler1.x ||
-                        this.props.euler1.y !== prevProps.euler1.y ||
-                        this.props.euler1.z !== prevProps.euler1.z)) ||
-                (this.props.euler2 &&
-                    (this.props.euler2.x !== prevProps.euler2.x ||
-                        this.props.euler2.y !== prevProps.euler2.y ||
-                        this.props.euler2.z !== prevProps.euler2.z))
+                this.props.phi1 !== prevProps.phi1 ||
+                this.props.theta1 !== prevProps.theta1 ||
+                this.props.phi2 !== prevProps.phi2 ||
+                this.props.theta2 !== prevProps.theta2
             ) {
                 // compute rotation from euler1 and euler2
                 let { euler, point1, point2 } = this.getRotationAndPoints()
@@ -119,13 +115,7 @@ class GreatCircleClass extends React.Component {
     }
 
     add() {
-        if (
-            !this.circle &&
-            this.props.color1 &&
-            this.props.color2 &&
-            this.props.euler1 &&
-            this.props.euler2
-        ) {
+        if (!this.circle && this.props.color1 && this.props.color2) {
             let geometry = new THREE.BufferGeometry()
             let count = 64
             let vertices = new Float32Array((count + 1) * 3)
@@ -207,18 +197,16 @@ class GreatCircleClass extends React.Component {
 
     getRotationAndPoints() {
         // compute rotation from euler1 and euler2
-        let pnt1 = new THREE.Vector3(1, 0, 0).applyEuler(
-            new THREE.Euler(
-                this.props.euler1.x,
-                this.props.euler1.y,
-                this.props.euler1.z
+        let pnt1 = new THREE.Vector3(1, 0, 0).applyMatrix4(
+            new THREE.Matrix4().multiplyMatrices(
+                new THREE.Matrix4().makeRotationZ(this.props.theta1),
+                new THREE.Matrix4().makeRotationY(this.props.phi1)
             )
         )
-        let pnt2 = new THREE.Vector3(1, 0, 0).applyEuler(
-            new THREE.Euler(
-                this.props.euler2.x,
-                this.props.euler2.y,
-                this.props.euler2.z
+        let pnt2 = new THREE.Vector3(1, 0, 0).applyMatrix4(
+            new THREE.Matrix4().multiplyMatrices(
+                new THREE.Matrix4().makeRotationZ(this.props.theta2),
+                new THREE.Matrix4().makeRotationY(this.props.phi2)
             )
         )
         let cross = new THREE.Vector3().crossVectors(pnt1, pnt2).normalize()
@@ -235,9 +223,6 @@ class GreatCircleClass extends React.Component {
         let point1 = pnt1.applyEuler(eulerInv)
         let point2 = pnt2.applyEuler(eulerInv)
 
-        //let angle1 = Math.acos(vec1.dot(new THREE.Vector3(1, 0, 0)))
-        //let angle2 = Math.acos(vec2.dot(new THREE.Vector3(1, 0, 0)))
-
         return { euler, point1, point2 }
     }
 
@@ -248,10 +233,12 @@ class GreatCircleClass extends React.Component {
 
 function mapStateToProps(state, ownProps) {
     return {
+        phi1: state.points?.[ownProps.id1]?.phi,
+        theta1: state.points?.[ownProps.id1]?.theta,
         color1: state.points?.[ownProps.id1]?.color,
+        phi2: state.points?.[ownProps.id2]?.phi,
+        theta2: state.points?.[ownProps.id2]?.theta,
         color2: state.points?.[ownProps.id2]?.color,
-        euler1: state.points?.[ownProps.id1]?.euler,
-        euler2: state.points?.[ownProps.id2]?.euler,
     }
 }
 

@@ -25,17 +25,14 @@ class MenuClass extends React.Component {
 
     addPoint() {
         let id = makeID(6)
+        let phi = -(Math.PI / 2) * Math.random()
+        let theta = 2 * Math.PI * Math.random()
         let color = {
             r: Math.floor(255 * Math.random()),
             g: Math.floor(255 * Math.random()),
             b: Math.floor(255 * Math.random()),
         }
-        let euler = {
-            x: 2 * Math.PI * Math.random() - Math.PI,
-            y: 2 * Math.PI * Math.random() - Math.PI,
-            z: 2 * Math.PI * Math.random() - Math.PI,
-        }
-        this.props.setPoint(id, { color, euler })
+        this.props.setPoint(id, { phi, theta, color })
         this.props.setSelectedID(id)
     }
 
@@ -93,59 +90,34 @@ class MenuClass extends React.Component {
                         />
                         <br />
                         <br />
-                        <b>X</b>
+                        <b>Phi</b>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <input
-                            min={-Math.PI}
-                            max={Math.PI}
+                            min={-Math.PI / 2 + 0.001}
+                            max={Math.PI / 2}
                             type="number"
-                            step={0.05}
-                            value={this.props.selectedPoint.euler.x}
+                            step={0.04}
+                            value={-this.props.selectedPoint.phi}
                             onChange={(e) => {
                                 this.props.setPoint(this.props.selectedID, {
                                     ...this.props.selectedPoint,
-                                    euler: {
-                                        ...this.props.selectedPoint.euler,
-                                        x: e.target.value,
-                                    },
+                                    phi: -e.target.value,
                                 })
                             }}
                         />
                         <br />
-                        <b>Y</b>
+                        <b>Theta</b>
                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <input
                             min={-Math.PI}
                             max={Math.PI}
                             type="number"
                             step={0.05}
-                            value={this.props.selectedPoint.euler.y}
+                            value={this.props.selectedPoint.theta}
                             onChange={(e) => {
                                 this.props.setPoint(this.props.selectedID, {
                                     ...this.props.selectedPoint,
-                                    euler: {
-                                        ...this.props.selectedPoint.euler,
-                                        y: e.target.value,
-                                    },
-                                })
-                            }}
-                        />
-                        <br />
-                        <b>Z</b>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <input
-                            min={-Math.PI}
-                            max={Math.PI}
-                            type="number"
-                            step={0.05}
-                            value={this.props.selectedPoint.euler.z}
-                            onChange={(e) => {
-                                this.props.setPoint(this.props.selectedID, {
-                                    ...this.props.selectedPoint,
-                                    euler: {
-                                        ...this.props.selectedPoint.euler,
-                                        z: e.target.value,
-                                    },
+                                    theta: e.target.value,
                                 })
                             }}
                         />
