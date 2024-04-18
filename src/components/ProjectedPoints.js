@@ -145,6 +145,7 @@ class ProjectedPointClass extends React.Component {
 
 function mapStateToProps(state, ownProps) {
     return {
+        plane: state.plane,
         color: state.points?.[ownProps.id]?.color,
         euler: state.points?.[ownProps.id]?.euler,
     }
