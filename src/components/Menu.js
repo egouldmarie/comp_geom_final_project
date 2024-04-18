@@ -9,7 +9,6 @@ import {
     setShowAxes,
     setShowPlane,
     setSelectedID,
-    setDistortCoefficients,
 } from "../store.js"
 
 import { makeID } from "../utils/utils.js"
@@ -168,7 +167,6 @@ function mapStateToProps(state, ownProps) {
         showPlane: state.showPlane,
         selectedID: state.selectedID,
         selectedPoint: state.points?.[state.selectedID],
-        ...state.distortCoefficients,
     }
 }
 
@@ -179,8 +177,6 @@ function mapDispatchToProps(dispatch, ownProps) {
         setShowAxes: (show) => dispatch(setShowAxes(show)),
         setShowPlane: (show) => dispatch(setShowPlane(show)),
         setSelectedID: (id) => dispatch(setSelectedID(id)),
-        setDistortCoefficients: (r0, r1, r2, r3) =>
-            dispatch(setDistortCoefficients(r0, r1, r2, r3)),
     }
 }
 

@@ -2,6 +2,7 @@ import React from "react"
 import { connect } from "react-redux"
 
 import * as THREE from "three"
+import { setProjectedPoint } from "../store.js"
 
 class ProjectedPointClass extends React.Component {
     constructor(props) {
@@ -58,37 +59,58 @@ class ProjectedPointClass extends React.Component {
                     ),
                 })
             )
-
+            this.point.myID = this.props.id
             this.point.frustumCulled = false
-            window.point = this.point
 
             this.point.onBeforeRender = () => {
-                let pos = new THREE.Vector3()
-                this.props.plane?.intersectLine(
-                    new THREE.Line3(
-                        new THREE.Vector3(),
-                        new THREE.Vector3(1, 0, 0)
-                            .applyMatrix4(
-                                new THREE.Matrix4().multiplyMatrices(
-                                    new THREE.Matrix4().makeRotationZ(
-                                        this.props.theta
-                                    ),
-                                    new THREE.Matrix4().makeRotationY(
-                                        this.props.phi
+                if (
+                    this._phi === undefined ||
+                    this._theta === undefined ||
+                    this._normalX === undefined ||
+                    this._normalY === undefined ||
+                    this._normalZ === undefined ||
+                    Math.abs(this.props.phi - this._phi) > 0.000001 ||
+                    Math.abs(this.props.theta - this._theta) > 0.000001 ||
+                    Math.abs(this.props.plane.normal.x - this._normalX) >
+                        0.000001 ||
+                    Math.abs(this.props.plane.normal.y - this._normalY) >
+                        0.000001 ||
+                    Math.abs(this.props.plane.normal.z - this._normalZ) >
+                        0.000001
+                ) {
+                    let pos = new THREE.Vector3()
+                    this.props.plane?.intersectLine(
+                        new THREE.Line3(
+                            new THREE.Vector3(),
+                            new THREE.Vector3(1, 0, 0)
+                                .applyMatrix4(
+                                    new THREE.Matrix4().multiplyMatrices(
+                                        new THREE.Matrix4().makeRotationZ(
+                                            this.props.theta
+                                        ),
+                                        new THREE.Matrix4().makeRotationY(
+                                            this.props.phi
+                                        )
                                     )
                                 )
-                            )
-                            .multiplyScalar(100)
-                    ),
-                    pos
-                )
+                                .multiplyScalar(100)
+                        ),
+                        pos
+                    )
 
-                this.point.position.set(pos.x, pos.y, pos.z)
-
-                if (pos.x === 0 && pos.y === 0 && pos.z === 0) {
-                    this.point.position.set(1000000, 1000000, 1000000)
-                } else {
                     this.point.position.set(pos.x, pos.y, pos.z)
+
+                    if (pos.x === 0 && pos.y === 0 && pos.z === 0) {
+                        this.point.position.set(1000000, 1000000, 1000000)
+                    } else {
+                        this.point.position.set(pos.x, pos.y, pos.z)
+                    }
+
+                    this._normalX = this.props.plane.normal.x
+                    this._normalY = this.props.plane.normal.y
+                    this._normalZ = this.props.plane.normal.z
+                    this._theta = this.props.theta
+                    this._phi = this.props.phi
                 }
             }
         }
@@ -101,6 +123,8 @@ class ProjectedPointClass extends React.Component {
         ) {
             this.props.group.add(this.point)
             this.setState({ added: true })
+
+            this.props.setProjectedPoint(true)
         }
     }
 
@@ -108,6 +132,8 @@ class ProjectedPointClass extends React.Component {
         if (this.point && this.props.group) {
             this.props.group.remove(this.point)
             this.setState({ added: false })
+
+            this.props.setProjectedPoint(false)
         }
     }
 
@@ -125,7 +151,10 @@ function mapStateToProps(state, ownProps) {
 }
 
 function mapDispatchToProps(dispatch, ownProps) {
-    return {}
+    return {
+        setProjectedPoint: (point) =>
+            dispatch(setProjectedPoint(ownProps.id, point)),
+    }
 }
 
 const ProjectedPoint = connect(

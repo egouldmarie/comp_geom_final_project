@@ -5,7 +5,8 @@ import * as THREE from "three"
 import { OrbitControls } from "three/examples/jsm/Addons.js"
 
 import { PlaneHelper } from "../utils/utils.js"
-import { ProjectedPoint } from "./ProjectedPoints.js"
+import { ProjectedLine } from "./ProjectedLine.js"
+import { ProjectedPoint } from "./ProjectedPoint.js"
 
 class OrthoProjViewClass extends React.Component {
     constructor(props) {
@@ -56,6 +57,7 @@ class OrthoProjViewClass extends React.Component {
         )
 
         this.pointGroup = new THREE.Group()
+        this.lineGroup = new THREE.Group()
 
         this.animate = this.animate.bind(this)
         this.resize = this.resize.bind(this)
@@ -88,6 +90,10 @@ class OrthoProjViewClass extends React.Component {
         if (!this.props.scene?.children.includes(this.pointGroup)) {
             this.props.scene.add(this.pointGroup)
             this.setState({ groupReady: true })
+        }
+        if (!this.props.scene?.children.includes(this.lineGroup)) {
+            this.props.scene.add(this.lineGroup)
+            this.setState({ lineGroupReady: true })
         }
     }
 
@@ -135,10 +141,12 @@ class OrthoProjViewClass extends React.Component {
 
             this.plane.visible = false
             this.pointGroup.visible = false
+            this.lineGroup.visible = false
             this.orthoRenderer.render(this.props.scene, this.orthoCamera)
 
             this.plane.visible = true
             this.pointGroup.visible = true
+            this.lineGroup.visible = true
             this.plane.plane.normal = new THREE.Vector3()
                 .copy(this.orthoCamera.position)
                 .normalize()
@@ -147,8 +155,57 @@ class OrthoProjViewClass extends React.Component {
             if (!this.props.showPlane) {
                 this.plane.visible = false
                 this.pointGroup.visible = false
+                this.lineGroup.visible = false
             }
         }
+    }
+
+    getProjectedPoints() {
+        return this.props.points
+            ? Object.keys(this.props.points).map((key) => (
+                  <ProjectedPoint
+                      id={key}
+                      key={key}
+                      plane={this.plane.plane}
+                      group={
+                          this.state.groupReady ? this.pointGroup : undefined
+                      }
+                  />
+              ))
+            : undefined
+    }
+
+    getProjectedLines() {
+        let projectedLines = []
+        let pointKeys = Object.keys(this.pointGroup.children)
+        for (let i = 0; i < pointKeys.length; i++) {
+            for (let j = i + 1; j < pointKeys.length; j++) {
+                projectedLines.push(
+                    <ProjectedLine
+                        key={pointKeys[i] + "<->" + pointKeys[j]}
+                        id1={
+                            this.props.projectedPoints[
+                                this.pointGroup.children[i].myID
+                            ] && this.pointGroup.children[i].myID
+                        }
+                        id2={
+                            this.props.projectedPoints[
+                                this.pointGroup.children[j].myID
+                            ] && this.pointGroup.children[j].myID
+                        }
+                        point1={this.pointGroup.children[i]}
+                        point2={this.pointGroup.children[j]}
+                        plane={this.plane.plane}
+                        group={
+                            this.state.lineGroupReady
+                                ? this.lineGroup
+                                : undefined
+                        }
+                    />
+                )
+            }
+        }
+        return projectedLines
     }
 
     render() {
@@ -207,20 +264,8 @@ class OrthoProjViewClass extends React.Component {
                         </div>
                     </div>
                 </div>
-                {this.props.points
-                    ? Object.keys(this.props.points).map((key) => (
-                          <ProjectedPoint
-                              id={key}
-                              key={key}
-                              plane={this.plane.plane}
-                              group={
-                                  this.state.groupReady
-                                      ? this.pointGroup
-                                      : undefined
-                              }
-                          />
-                      ))
-                    : undefined}
+                {this.getProjectedPoints()}
+                {this.getProjectedLines()}
             </>
         )
     }
@@ -231,6 +276,7 @@ function mapStateToProps(state, ownProps) {
         points: state.points,
         scalar: state.scalar,
         showPlane: state.showPlane,
+        projectedPoints: state.projectedPoints,
     }
 }
 

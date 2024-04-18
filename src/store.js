@@ -6,7 +6,7 @@ const actionTypes = {
     SHOW_AXES: "SHOW_AXES",
     SHOW_PLANE: "SHOW_PLANE",
     SELECTED_ID: "SELECTED_ID",
-    DISTORT_COEFFICIENTS: "DISTORT_COEFFICIENTS",
+    PROJECTED_POINTS: "PROJECTED_POINTS",
 }
 
 const reducer = (
@@ -22,7 +22,7 @@ const reducer = (
         showAxes: true,
         showPlane: false,
         selectedID: "default",
-        distortCoefficients: { r0: 0, r1: 0, r2: 0, r3: 0 },
+        projectedPoints: {},
     },
     action
 ) => {
@@ -47,8 +47,8 @@ const reducer = (
         case actionTypes.SELECTED_ID: {
             return { ...state, selectedID: action.payload }
         }
-        case actionTypes.DISTORT_COEFFICIENTS: {
-            return { ...state, distortCoefficients: { ...action.payload } }
+        case actionTypes.PROJECTED_POINTS: {
+            return { ...state, projectedPoints: { ...action.payload } }
         }
         default:
             return state
@@ -89,11 +89,12 @@ export function setShowPlane(show) {
     }
 }
 
-export function setDistortCoefficients(r0, r1, r2, r3) {
+export function setProjectedPoint(id, projectedPoint) {
     return (dispatch, getState) => {
+        const projectedPoints = getState().projectedPoints
         dispatch({
-            type: actionTypes.DISTORT_COEFFICIENTS,
-            payload: { r0, r1, r2, r3 },
+            type: actionTypes.PROJECTED_POINTS,
+            payload: { ...projectedPoints, [id]: projectedPoint },
         })
     }
 }
