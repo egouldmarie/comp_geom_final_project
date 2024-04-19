@@ -35,7 +35,7 @@ export class PlaneHelper extends THREE.Mesh {
             new THREE.MeshBasicMaterial({
                 side: THREE.DoubleSide,
                 color: color,
-                opacity: 0.75,
+                opacity: 1,
                 transparent: true,
             })
         )
