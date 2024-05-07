@@ -32,7 +32,7 @@ class OrthoProjViewClass extends React.Component {
             10
         )
         this.orthoCamera.up.set(0, 0, 1)
-        this.orthoCamera.position.set(Math.sqrt(2), Math.sqrt(2), 0)
+        this.orthoCamera.position.set(0, 0, 2)
         this.orthoCamera.lookAt(new THREE.Vector3())
 
         this.controls = new OrbitControls(

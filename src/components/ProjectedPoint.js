@@ -78,22 +78,24 @@ class ProjectedPointClass extends React.Component {
                     Math.abs(this.props.plane.normal.z - this._normalZ) >
                         0.000001
                 ) {
+                    let vec = new THREE.Vector3(1, 0, 0).applyMatrix4(
+                        new THREE.Matrix4().multiplyMatrices(
+                            new THREE.Matrix4().makeRotationZ(this.props.theta),
+                            new THREE.Matrix4().makeRotationY(this.props.phi)
+                        )
+                    )
+                    if (
+                        new THREE.Vector3()
+                            .copy(this.props.plane.normal)
+                            .dot(vec) > 0
+                    ) {
+                        vec.multiplyScalar(-1)
+                    }
                     let pos = new THREE.Vector3()
                     this.props.plane?.intersectLine(
                         new THREE.Line3(
                             new THREE.Vector3(),
-                            new THREE.Vector3(1, 0, 0)
-                                .applyMatrix4(
-                                    new THREE.Matrix4().multiplyMatrices(
-                                        new THREE.Matrix4().makeRotationZ(
-                                            this.props.theta
-                                        ),
-                                        new THREE.Matrix4().makeRotationY(
-                                            this.props.phi
-                                        )
-                                    )
-                                )
-                                .multiplyScalar(100)
+                            vec.multiplyScalar(100)
                         ),
                         pos
                     )

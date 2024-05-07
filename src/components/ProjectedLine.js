@@ -39,7 +39,7 @@ class ProjectedLineClass extends React.Component {
                     this.props.color2.g / 255,
                     this.props.color2.b / 255
                 )
-                this.line.geometry.attributes.needsUpdate = true
+                this.line.geometry.attributes.color.needsUpdate = true
             }
         }
     }
